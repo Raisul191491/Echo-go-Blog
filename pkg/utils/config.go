@@ -40,12 +40,12 @@ func GetDB() *gorm.DB {
 }
 
 func CreateDatabase() {
-	db.Migrator().DropTable(&models.User{}, &models.News{})
+	db.Migrator().DropTable(&models.User{}, &models.Blog{})
 	db.Migrator().CreateTable(&models.User{})
-	db.Migrator().CreateTable(&models.News{})
+	db.Migrator().CreateTable(&models.Blog{})
 }
 
 func Migrate() {
 	db.Migrator().AutoMigrate(&models.User{})
-	db.Migrator().AutoMigrate(&models.News{})
+	db.Migrator().AutoMigrate(&models.Blog{})
 }

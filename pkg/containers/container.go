@@ -1,24 +1,20 @@
 package containers
 
 import (
+	"go-blog/pkg/repositories"
 	"go-blog/pkg/routes"
+	"go-blog/pkg/services"
 	"go-blog/pkg/utils"
+	"log"
 
 	"github.com/labstack/echo/v4"
 )
 
 func Init(e *echo.Echo) {
 	utils.Connect()
-
-	// Ibookcrud := repositories.BookDbInstance(db)
-	// Iauthorcrud := repositories.AuthorDbInstance(db)
-	// services.BookInterfaceInstance(Ibookcrud)
-	// services.AuthorInterfaceInstance(Iauthorcrud)
-
-	// e.GET("/", func(c echo.Context) error {
-	// 	return c.String(http.StatusOK, "Hello, World!")
-	// })
-	// routes.RegisteredBookStoreRoutes(r)
+	db := utils.GetDB()
+	userInterface := repositories.UserDBInstance(db)
+	services.SetUserInterface(userInterface)
 	routes.UserBlogRoutes(e)
-	e.Start(":9010")
+	log.Fatal(e.Start(":9020"))
 }
