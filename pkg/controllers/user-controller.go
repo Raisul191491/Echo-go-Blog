@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"go-blog/pkg/models"
 	"go-blog/pkg/services"
 	"go-blog/pkg/types"
@@ -59,8 +60,9 @@ func Login(e echo.Context) error {
 	}
 	os.Setenv("Auth", token)
 	os.Setenv("Email", loginUser.Email)
+	os.Setenv("ID", fmt.Sprint(user[0].ID))
 
-	return e.JSON(http.StatusOK, token)
+	return e.JSON(http.StatusOK, "Successfully logged in...")
 }
 
 func Logout(e echo.Context) error {
@@ -71,9 +73,10 @@ func Logout(e echo.Context) error {
 }
 
 func GetProfiles(e echo.Context) error {
-	var users []models.User
+	var tempUsers []models.User
 	email := e.QueryParam("email")
-	users = services.Get(email)
+	tempUsers = services.Get(email)
+	users := services.RemoveSensitiveData(tempUsers)
 
 	return e.JSON(http.StatusOK, users)
 }
@@ -101,7 +104,7 @@ func DeleteProfile(e echo.Context) error {
 }
 
 func UpdateProfile(e echo.Context) error {
-	updateProfile := &models.User{}
+	updateProfile := &types.RegistrationType{}
 	if err := e.Bind(updateProfile); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
@@ -122,10 +125,17 @@ func UpdateProfile(e echo.Context) error {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
 
+	token, err := services.GenerateToken(newProfile.Email, newProfile.Username)
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, "err.Error()")
+	}
+	os.Setenv("Auth", token)
+	os.Setenv("Email", newProfile.Email)
+
 	return e.JSON(http.StatusCreated, "Successfull updated profile")
 }
 
-func ChangeProfileParams(updateProfile, currentProfile models.User) models.User {
+func ChangeProfileParams(updateProfile types.RegistrationType, currentProfile models.User) models.User {
 	if updateProfile.Username != "" {
 		currentProfile.Username = updateProfile.Username
 	}

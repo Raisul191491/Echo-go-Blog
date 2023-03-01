@@ -19,7 +19,7 @@ func UserBlogRoutes(e *echo.Echo) {
 	user.POST("/logout", controllers.Logout)
 	user.GET("/profiles", controllers.GetProfiles)
 	user.DELETE("/deleteprofile", controllers.DeleteProfile)
-	// user.PUT("/:id", controllers.UpdateProfile)
+	user.PUT("/updateprofile", controllers.UpdateProfile)
 
 	// /* News Routes */
 	// user.POST("blog", controllers.CreateBlog)

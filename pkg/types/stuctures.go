@@ -1,6 +1,10 @@
 package types
 
-import "github.com/golang-jwt/jwt"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt"
+)
 
 type LoginType struct {
 	Email    string `json:"email"`
@@ -21,4 +25,11 @@ type Claim struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
 	jwt.StandardClaims
+}
+
+type CustomResponse struct {
+	ID        uint      `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
