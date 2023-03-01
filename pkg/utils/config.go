@@ -28,13 +28,13 @@ func Connect() {
 		panic(err)
 	}
 	db = d
-	// CreateDatabase()
 }
 
 func GetDB() *gorm.DB {
+	// CreateDatabase()
+	Migrate()
 	if db == nil {
 		Connect()
-		Migrate()
 	}
 	return db
 }

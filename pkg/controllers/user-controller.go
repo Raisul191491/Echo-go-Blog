@@ -66,9 +66,9 @@ func Login(e echo.Context) error {
 }
 
 func Logout(e echo.Context) error {
-	if err := os.Setenv("Auth", ""); err != nil {
-		return err
-	}
+	os.Unsetenv("Email")
+	os.Unsetenv("ID")
+	os.Unsetenv("Auth")
 	return e.JSON(http.StatusOK, "Successfully logged out")
 }
 
@@ -77,6 +77,10 @@ func GetProfiles(e echo.Context) error {
 	email := e.QueryParam("email")
 	tempUsers = services.Get(email)
 	users := services.RemoveSensitiveData(tempUsers)
+
+	if len(users) == 0 {
+		return e.JSON(http.StatusOK, "No user found")
+	}
 
 	return e.JSON(http.StatusOK, users)
 }

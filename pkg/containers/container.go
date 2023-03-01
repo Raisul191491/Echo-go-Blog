@@ -13,8 +13,12 @@ import (
 func Init(e *echo.Echo) {
 	utils.Connect()
 	db := utils.GetDB()
+
 	userInterface := repositories.UserDBInstance(db)
+	blogInterface := repositories.BlogDBInstance(db)
 	services.SetUserInterface(userInterface)
+	services.SetBlogInterface(blogInterface)
+
 	routes.UserBlogRoutes(e)
 	log.Fatal(e.Start(":9020"))
 }

@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/labstack/echo"
+	validation "github.com/go-ozzo/ozzo-validation"
 )
 
 type Blog struct {
@@ -15,9 +15,20 @@ type Blog struct {
 	UserID    uint      `json:"userID"`
 	User      User      `gorm:"foreignKey:UserID;references:ID" json:"user"`
 }
-type INews interface {
-	CreateBlog(e echo.Context) error
-	UpdateBlog(e echo.Context) error
-	GetAnyBlog(e echo.Context) error
-	DeleteBlog(e echo.Context) error
+type IBlog interface {
+	CreateBlog(post *Blog) error
+	GetAnyBlog(userId, postId int) []Blog
+	DeleteBlog(userId int) error
+	// UpdateBlog(e echo.Context) error
+}
+
+func (b Blog) Validate() error {
+	return validation.ValidateStruct(&b,
+		validation.Field(&b.Subject,
+			validation.Required.Error("Please input subject of your post"),
+			validation.Length(5, 60)),
+		validation.Field(&b.Body,
+			validation.Required.Error("Description needed!"),
+			validation.Length(6, 300)),
+	)
 }

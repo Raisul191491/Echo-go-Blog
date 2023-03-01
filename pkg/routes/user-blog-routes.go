@@ -22,8 +22,8 @@ func UserBlogRoutes(e *echo.Echo) {
 	user.PUT("/updateprofile", controllers.UpdateProfile)
 
 	// /* News Routes */
-	// user.POST("blog", controllers.CreateBlog)
-	// user.GET("blog", controllers.GetAnyBlog)
+	user.POST("/blog", controllers.CreateBlog)
+	user.GET("/blog", controllers.GetAnyBlog)
+	user.DELETE("/blog/:id", controllers.DeleteBlog)
 	// user.PUT("/blog/:id", controllers.UpdateBlog)
-	// user.PUT("blog/:id", controllers.DeleteBlog)
 }
