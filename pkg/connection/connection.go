@@ -1,7 +1,9 @@
 package connection
 
 import (
+	"fmt"
 	"go-blog/pkg/models"
+	"go-blog/pkg/utils"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -12,7 +14,10 @@ var (
 )
 
 func Connect() {
-	dsn := "root:191491@tcp(127.0.0.1:3306)/gonews?charset=utf8mb4&parseTime=True&loc=Local"
+	utils.SetConfig()
+	config := utils.LocalConfig
+
+	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8mb4&parseTime=True&loc=Local", config.DBUser, config.DBPass, config.DBIP, config.DbName)
 	d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
