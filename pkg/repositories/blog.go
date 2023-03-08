@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"go-blog/pkg/models"
 
 	"gorm.io/gorm"
@@ -38,10 +39,13 @@ func (repo *dbBlog) GetAnyBlog(userId, postId int) []models.Blog {
 	return blogs
 }
 
-func (repo *dbBlog) DeleteBlog(postId int) error {
+func (repo *dbBlog) DeleteBlog(postId, userId int) error {
 	var deletedBlog models.Blog
-	if err := db.Where("id = ?", postId).Delete(deletedBlog).Error; err != nil {
-		return err
+	if postId != 0 && db.Where("id = ?", postId).Delete(deletedBlog).Error != nil {
+		return errors.New("")
+	}
+	if userId != 0 && db.Where("user_id = ?", userId).Delete(deletedBlog).Error != nil {
+		return errors.New("")
 	}
 	return nil
 }

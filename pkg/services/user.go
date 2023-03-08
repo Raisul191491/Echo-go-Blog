@@ -8,6 +8,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var UserInterface models.IUser
+
+func SetUserInterface(user models.IUser) {
+	UserInterface = user
+}
+
 func RegisterUser(user *models.User) error {
 	tempPassword, err := HashPassword(user.Password)
 	if err != nil {
@@ -54,10 +60,10 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func RemoveSensitiveData(users []models.User) []types.CustomResponse {
-	var finalUsers []types.CustomResponse
+func RemoveSensitiveData(users []models.User) []types.CustomProfileResponse {
+	var finalUsers []types.CustomProfileResponse
 	for _, val := range users {
-		finalUsers = append(finalUsers, types.CustomResponse{
+		finalUsers = append(finalUsers, types.CustomProfileResponse{
 			ID:        val.ID,
 			Username:  val.Username,
 			Email:     val.Email,

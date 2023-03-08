@@ -18,7 +18,7 @@ type Blog struct {
 type IBlog interface {
 	CreateBlog(post *Blog) error
 	GetAnyBlog(userId, postId int) []Blog
-	DeleteBlog(userId int) error
+	DeleteBlog(postId, userId int) error
 	// UpdateBlog(e echo.Context) error
 }
 

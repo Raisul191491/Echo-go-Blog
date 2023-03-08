@@ -12,6 +12,11 @@ import (
 )
 
 func Registration(e echo.Context) error {
+
+	if os.Getenv("Auth") != "" && os.Getenv("ID") != "" && os.Getenv("Email") != "" {
+		return e.JSON(http.StatusBadRequest, "First Log out of existing account")
+	}
+
 	user := &models.User{}
 	if err := e.Bind(user); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
@@ -40,6 +45,10 @@ func Registration(e echo.Context) error {
 }
 
 func Login(e echo.Context) error {
+	if os.Getenv("Auth") != "" && os.Getenv("ID") != "" && os.Getenv("Email") != "" {
+		return e.JSON(http.StatusBadRequest, "Already logged in to another account")
+	}
+
 	loginUser := &types.LoginType{}
 	if err := e.Bind(loginUser); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
@@ -82,6 +91,11 @@ func GetProfiles(e echo.Context) error {
 		return e.JSON(http.StatusOK, "No user found")
 	}
 
+	if len(users) == 1 {
+		blogList := services.GetBlogs(int(users[0].ID), 0)
+		users[0].Blogs = blogList
+	}
+
 	return e.JSON(http.StatusOK, users)
 }
 
@@ -95,8 +109,17 @@ func DeleteProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Not authorized to delete this account")
 	}
 
+	id, err := GetIntEnv("ID")
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, "Parsing error")
+	}
+
 	if err := Logout(e); err != nil {
 		return e.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if err := services.DeleteBlog(0, id); err != nil {
+		return e.JSON(http.StatusBadRequest, "Could not delete associate blogs")
 	}
 
 	if err := services.DeleteProfile(deleteProfile.Email); err != nil {

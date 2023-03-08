@@ -5,6 +5,12 @@ import (
 	"go-blog/pkg/types"
 )
 
+var BlogInterface models.IBlog
+
+func SetBlogInterface(blog models.IBlog) {
+	BlogInterface = blog
+}
+
 func CreateBlog(post *models.Blog) error {
 	if createErr := BlogInterface.CreateBlog(post); createErr != nil {
 		return createErr
@@ -29,8 +35,8 @@ func GetBlogs(userId, postId int) []types.CustomBlogResponse {
 	return finalList
 }
 
-func DeleteBlog(postId int) error {
-	if deleteErr := BlogInterface.DeleteBlog(postId); deleteErr != nil {
+func DeleteBlog(postId, userId int) error {
+	if deleteErr := BlogInterface.DeleteBlog(postId, userId); deleteErr != nil {
 		return deleteErr
 	}
 	return nil

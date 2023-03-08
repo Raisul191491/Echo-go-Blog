@@ -17,7 +17,7 @@ func CreateBlog(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
 
-	id, err := getIntEnv("ID")
+	id, err := GetIntEnv("ID")
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -76,7 +76,7 @@ func DeleteBlog(e echo.Context) error {
 		return e.JSON(http.StatusOK, "Post does not exist!")
 	}
 
-	userId, err := getIntEnv("ID")
+	userId, err := GetIntEnv("ID")
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
@@ -85,14 +85,14 @@ func DeleteBlog(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Not authorized to delete this post")
 	}
 
-	if err := services.DeleteBlog(int(postId)); err != nil {
+	if err := services.DeleteBlog(int(postId), 0); err != nil {
 		return e.JSON(http.StatusInternalServerError, "Could not delete post")
 	}
 
 	return e.JSON(http.StatusOK, "Successfully deleted post")
 }
 
-func getIntEnv(key string) (int, error) {
+func GetIntEnv(key string) (int, error) {
 	val := os.Getenv(key)
 	ret, err := strconv.Atoi(val)
 	return ret, err
