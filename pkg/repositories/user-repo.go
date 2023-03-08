@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"go-blog/pkg/domains"
 	"go-blog/pkg/models"
 
 	"gorm.io/gorm"
@@ -12,7 +13,7 @@ type dbUser struct {
 	DB *gorm.DB
 }
 
-func UserDBInstance(d *gorm.DB) models.IUser {
+func UserDBInstance(d *gorm.DB) domain.IUserRepo {
 	db = d
 	return &dbUser{
 		DB: db,

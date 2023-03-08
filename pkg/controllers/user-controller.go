@@ -17,7 +17,7 @@ func Registration(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "First Log out of existing account")
 	}
 
-	user := &models.User{}
+	user := &types.ControlUser{}
 	if err := e.Bind(user); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
@@ -131,7 +131,7 @@ func DeleteProfile(e echo.Context) error {
 }
 
 func UpdateProfile(e echo.Context) error {
-	updateProfile := &types.RegistrationType{}
+	updateProfile := &types.ControlUser{}
 	if err := e.Bind(updateProfile); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
@@ -139,8 +139,9 @@ func UpdateProfile(e echo.Context) error {
 	currentProfile := services.Get(os.Getenv("Email"))[0]
 	currentEmail := currentProfile.Email
 
-	newProfile := ChangeProfileParams(*updateProfile, currentProfile)
-	if err := newProfile.Validate(); err != nil {
+	newProfile, validateProfile := ChangeProfileParams(*updateProfile, currentProfile)
+
+	if err := validateProfile.Validate(); err != nil {
 		return e.JSON(http.StatusBadRequest, err.Error())
 	}
 
@@ -162,7 +163,7 @@ func UpdateProfile(e echo.Context) error {
 	return e.JSON(http.StatusCreated, "Successfull updated profile")
 }
 
-func ChangeProfileParams(updateProfile types.RegistrationType, currentProfile models.User) models.User {
+func ChangeProfileParams(updateProfile types.ControlUser, currentProfile models.User) (models.User, types.ControlUser) {
 	if updateProfile.Username != "" {
 		currentProfile.Username = updateProfile.Username
 	}
@@ -173,5 +174,11 @@ func ChangeProfileParams(updateProfile types.RegistrationType, currentProfile mo
 		currentProfile.Password = updateProfile.Password
 	}
 
-	return currentProfile
+	tempProfile := types.ControlUser{
+		Username: currentProfile.Username,
+		Email:    currentProfile.Email,
+		Password: currentProfile.Password,
+	}
+
+	return currentProfile, tempProfile
 }

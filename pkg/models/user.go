@@ -2,9 +2,6 @@ package models
 
 import (
 	"time"
-
-	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 type User struct {
@@ -23,18 +20,4 @@ type IUser interface {
 	GetUsers(email string) []User
 	UpdateProfile(user *User) error
 	DeleteProfile(email string) error
-}
-
-func (u User) Validate() error {
-	return validation.ValidateStruct(&u,
-		validation.Field(&u.Username,
-			validation.Required.Error("Enter user name"),
-			validation.Length(5, 30)),
-		validation.Field(&u.Email,
-			validation.Required.Error("Email field cannot be empty"),
-			is.Email),
-		validation.Field(&u.Password,
-			validation.Required.Error("password field cannot be empty"),
-			validation.Length(8, 30)),
-	)
 }
