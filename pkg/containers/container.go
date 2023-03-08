@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"go-blog/pkg/controllers"
 	"go-blog/pkg/repositories"
 	"go-blog/pkg/routes"
 	"go-blog/pkg/services"
@@ -14,10 +15,15 @@ func Init(e *echo.Echo) {
 	utils.Connect()
 	db := utils.GetDB()
 
-	userInterface := repositories.UserDBInstance(db)
-	blogInterface := repositories.BlogDBInstance(db)
-	services.SetUserInterface(userInterface)
-	services.SetBlogInterface(blogInterface)
+	userRepo := repositories.UserDBInstance(db)
+	services.SetUserInterface(userRepo)
+	userService := services.UserServiceInstance(userRepo)
+	controllers.SetUserService(userService)
+
+	blogRepo := repositories.BlogDBInstance(db)
+	services.SetBlogInterface(blogRepo)
+	blogService := services.BlogServiceInstance(blogRepo)
+	controllers.SetBlogService(blogService)
 
 	routes.UserBlogRoutes(e)
 	log.Fatal(e.Start(":9020"))

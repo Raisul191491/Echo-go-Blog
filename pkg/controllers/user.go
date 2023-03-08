@@ -99,7 +99,7 @@ func GetProfiles(e echo.Context) error {
 	}
 
 	if len(users) == 1 {
-		blogList := services.GetBlogs(int(users[0].ID), 0)
+		blogList := BlogService.GetBlogs(int(users[0].ID), 0)
 		users[0].Blogs = blogList
 	}
 
@@ -125,7 +125,7 @@ func DeleteProfile(e echo.Context) error {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	if err := services.DeleteBlog(0, id); err != nil {
+	if err := BlogService.DeleteBlog(0, id); err != nil {
 		return e.JSON(http.StatusBadRequest, "Could not delete associate blogs")
 	}
 

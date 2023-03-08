@@ -8,18 +8,28 @@ import (
 
 var BlogInterface domain.IBlogRepo
 
+type BlogService struct {
+	bRepo domain.IBlogRepo
+}
+
+func BlogServiceInstance(blogRepo domain.IBlogRepo) domain.IBlogService {
+	return &BlogService{
+		bRepo: blogRepo,
+	}
+}
+
 func SetBlogInterface(blog domain.IBlogRepo) {
 	BlogInterface = blog
 }
 
-func CreateBlog(post *models.Blog) error {
+func (b *BlogService) CreateBlog(post *models.Blog) error {
 	if createErr := BlogInterface.CreateBlog(post); createErr != nil {
 		return createErr
 	}
 	return nil
 }
 
-func GetBlogs(userId, postId int) []types.CustomBlogResponse {
+func (b *BlogService) GetBlogs(userId, postId int) []types.CustomBlogResponse {
 	var finalList []types.CustomBlogResponse
 	blogList := BlogInterface.GetAnyBlog(userId, postId)
 	for _, val := range blogList {
@@ -36,7 +46,7 @@ func GetBlogs(userId, postId int) []types.CustomBlogResponse {
 	return finalList
 }
 
-func DeleteBlog(postId, userId int) error {
+func (b *BlogService) DeleteBlog(postId, userId int) error {
 	if deleteErr := BlogInterface.DeleteBlog(postId, userId); deleteErr != nil {
 		return deleteErr
 	}

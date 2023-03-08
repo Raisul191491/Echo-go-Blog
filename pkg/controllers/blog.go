@@ -1,8 +1,8 @@
 package controllers
 
 import (
+	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
-	"go-blog/pkg/services"
 	"go-blog/pkg/types"
 	"net/http"
 	"os"
@@ -10,6 +10,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+var BlogService domain.IBlogService
+
+func SetBlogService(blogService domain.IBlogService) {
+	BlogService = blogService
+}
 
 func CreateBlog(e echo.Context) error {
 	newBlog := &types.ControlBlog{}
@@ -32,7 +38,7 @@ func CreateBlog(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if err := services.CreateBlog(blog); err != nil {
+	if err := BlogService.CreateBlog(blog); err != nil {
 		return e.JSON(http.StatusInternalServerError, "Post not created")
 	}
 
@@ -53,7 +59,7 @@ func GetAnyBlog(e echo.Context) error {
 		userId = 0
 	}
 
-	blogs := services.GetBlogs(int(blogId), int(userId))
+	blogs := BlogService.GetBlogs(int(blogId), int(userId))
 
 	if len(blogs) == 0 {
 		return e.JSON(http.StatusOK, "No post found")
@@ -70,7 +76,7 @@ func DeleteBlog(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Enter valid post ID")
 	}
 
-	checkBlog := services.GetBlogs(0, int(postId))
+	checkBlog := BlogService.GetBlogs(0, int(postId))
 
 	if len(checkBlog) != 1 {
 		return e.JSON(http.StatusOK, "Post does not exist!")
@@ -85,7 +91,7 @@ func DeleteBlog(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Not authorized to delete this post")
 	}
 
-	if err := services.DeleteBlog(int(postId), 0); err != nil {
+	if err := BlogService.DeleteBlog(int(postId), 0); err != nil {
 		return e.JSON(http.StatusInternalServerError, "Could not delete post")
 	}
 
