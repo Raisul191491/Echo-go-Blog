@@ -2,13 +2,24 @@ package auth
 
 import (
 	"errors"
+	domain "go-blog/pkg/domains"
 	"go-blog/pkg/types"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 )
 
-func GenerateJWT(email, username string) (string, error) {
+type TokenAuth struct {
+	tRepo domain.IUserRepo
+}
+
+func TokenAuthInstance(uRepo domain.IUserRepo) domain.IToken {
+	return &TokenAuth{
+		tRepo: uRepo,
+	}
+}
+
+func (t *TokenAuth) GenerateJWT(email, username string) (string, error) {
 	claim := &types.Claim{
 		Username: username,
 		Email:    email,
@@ -21,7 +32,7 @@ func GenerateJWT(email, username string) (string, error) {
 	return tokenString, err
 }
 
-func ValidateToken(signedToken string) error {
+func (t *TokenAuth) ValidateToken(signedToken string) error {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&types.Claim{},

@@ -1,19 +1,20 @@
 package containers
 
 import (
+	"go-blog/pkg/auth"
+	"go-blog/pkg/connection"
 	"go-blog/pkg/controllers"
 	"go-blog/pkg/repositories"
 	"go-blog/pkg/routes"
 	"go-blog/pkg/services"
-	"go-blog/pkg/utils"
 	"log"
 
 	"github.com/labstack/echo/v4"
 )
 
 func Init(e *echo.Echo) {
-	utils.Connect()
-	db := utils.GetDB()
+	connection.Connect()
+	db := connection.GetDB()
 
 	userRepo := repositories.UserDBInstance(db)
 	services.SetUserInterface(userRepo)
@@ -24,6 +25,9 @@ func Init(e *echo.Echo) {
 	services.SetBlogInterface(blogRepo)
 	blogService := services.BlogServiceInstance(blogRepo)
 	controllers.SetBlogService(blogService)
+
+	tokenAuth := auth.TokenAuthInstance(userRepo)
+	services.SetTokenAuth(tokenAuth)
 
 	routes.UserBlogRoutes(e)
 	log.Fatal(e.Start(":9020"))

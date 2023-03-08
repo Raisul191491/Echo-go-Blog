@@ -1,51 +1,38 @@
 package utils
 
 import (
-	"go-blog/pkg/models"
+	"log"
 
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
+	"github.com/spf13/viper"
 )
 
-var (
-	db *gorm.DB
-	// user     string = os.Getenv("DBUSER")
-	// pass     string = os.Getenv("DBPASS")
-	// host     string = os.Getenv("DBHOST")
-	// port     string = os.Getenv("DBPORT")
-	// database string = os.Getenv("DBNAME")
-)
+var LocalConfig *Config
 
-func Connect() {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	log.Fatal("Error loading .env file")
-	// }
+type Config struct {
+	DBUser string `mapstructure:"DBUSER"`
+	DBPass string `mapstructure:"DBPASS"`
+	DBIP   string `mapstructure:"DBIP"`
+	DbName string `mapstructure:"DBNAME"`
+	Port   string `mapstructure:"PORT"`
+}
 
-	dsn := "root:191491@tcp(127.0.0.1:3306)/gonews?charset=utf8mb4&parseTime=True&loc=Local"
-	d, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic(err)
+func InitConfig() (config *Config) {
+	viper.AddConfigPath(".")
+	viper.SetConfigName("app")
+	viper.SetConfigType("env")
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatal("Error reading env file", err)
 	}
-	db = d
-}
 
-func GetDB() *gorm.DB {
-	// CreateDatabase()
-	Migrate()
-	if db == nil {
-		Connect()
+	if err := viper.Unmarshal(&config); err != nil {
+		log.Fatal("Error reading env file", err)
 	}
-	return db
+
+	return
 }
 
-func CreateDatabase() {
-	db.Migrator().DropTable(&models.User{}, &models.Blog{})
-	db.Migrator().CreateTable(&models.User{})
-	db.Migrator().CreateTable(&models.Blog{})
-}
-
-func Migrate() {
-	db.Migrator().AutoMigrate(&models.User{})
-	db.Migrator().AutoMigrate(&models.Blog{})
+func SetConfig() {
+	LocalConfig = InitConfig()
 }
