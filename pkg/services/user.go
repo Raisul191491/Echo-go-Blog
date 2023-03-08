@@ -11,32 +11,42 @@ import (
 
 var UserInterface domain.IUserRepo
 
+type UserService struct {
+	uRepo domain.IUserRepo
+}
+
+func UserServiceInstance(userRepo domain.IUserRepo) domain.IUserService {
+	return &UserService{
+		uRepo: userRepo,
+	}
+}
+
 func SetUserInterface(user domain.IUserRepo) {
 	UserInterface = user
 }
 
-func RegisterUser(user *models.User) error {
+func (u *UserService) RegisterUser(user *models.User) error {
 	tempPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return err
 	}
 	user.Password = tempPassword
 
-	regErr := UserInterface.Register(user)
+	regErr := UserInterface.RegisterUser(user)
 	return regErr
 }
 
-func Get(email string) []models.User {
+func (u *UserService) GetUser(email string) []models.User {
 	userlist := UserInterface.GetUsers(email)
 	return userlist
 }
 
-func DeleteProfile(email string) error {
+func (u *UserService) DeleteProfile(email string) error {
 	deleteErr := UserInterface.DeleteProfile(email)
 	return deleteErr
 }
 
-func UpdateProfile(user *models.User) error {
+func (u *UserService) UpdateProfile(user *models.User) error {
 	tempPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return err
@@ -49,7 +59,7 @@ func UpdateProfile(user *models.User) error {
 	return nil
 }
 
-func CheckPassword(loginPass, hashedPass string) error {
+func (u *UserService) CheckPassword(loginPass, hashedPass string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPass), []byte(loginPass)); err != nil {
 		return errors.New("wrong credential(password)")
 	}
@@ -61,7 +71,7 @@ func HashPassword(password string) (string, error) {
 	return string(bytes), err
 }
 
-func RemoveSensitiveData(users []models.User) []types.CustomProfileResponse {
+func (u *UserService) RemoveSensitiveData(users []models.User) []types.CustomProfileResponse {
 	var finalUsers []types.CustomProfileResponse
 	for _, val := range users {
 		finalUsers = append(finalUsers, types.CustomProfileResponse{

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 	"go-blog/pkg/services"
 	"go-blog/pkg/types"
@@ -10,6 +11,12 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+var UserService domain.IUserService
+
+func SetUserService(userService domain.IUserService) {
+	UserService = userService
+}
 
 func Registration(e echo.Context) error {
 
@@ -32,12 +39,12 @@ func Registration(e echo.Context) error {
 		Password: user.Password,
 	}
 
-	tempUser := services.Get(newUser.Email)
+	tempUser := UserService.GetUser(newUser.Email)
 	if len(tempUser) > 0 {
 		return e.JSON(http.StatusBadRequest, "Account with this email already exists!")
 	}
 
-	err := services.RegisterUser(newUser)
+	err := UserService.RegisterUser(newUser)
 	if err != nil {
 		return e.JSON(http.StatusBadRequest, "User not created")
 	}
@@ -54,12 +61,12 @@ func Login(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
 
-	user := services.Get(loginUser.Email)
+	user := UserService.GetUser(loginUser.Email)
 	if len(user) != 1 {
 		return e.JSON(http.StatusBadRequest, "Account does not exist!")
 	}
 
-	if err := services.CheckPassword(loginUser.Password, user[0].Password); err != nil {
+	if err := UserService.CheckPassword(loginUser.Password, user[0].Password); err != nil {
 		return e.JSON(http.StatusUnauthorized, err.Error())
 	}
 
@@ -84,8 +91,8 @@ func Logout(e echo.Context) error {
 func GetProfiles(e echo.Context) error {
 	var tempUsers []models.User
 	email := e.QueryParam("email")
-	tempUsers = services.Get(email)
-	users := services.RemoveSensitiveData(tempUsers)
+	tempUsers = UserService.GetUser(email)
+	users := UserService.RemoveSensitiveData(tempUsers)
 
 	if len(users) == 0 {
 		return e.JSON(http.StatusOK, "No user found")
@@ -122,7 +129,7 @@ func DeleteProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Could not delete associate blogs")
 	}
 
-	if err := services.DeleteProfile(deleteProfile.Email); err != nil {
+	if err := UserService.DeleteProfile(deleteProfile.Email); err != nil {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
 
@@ -136,7 +143,7 @@ func UpdateProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
 
-	currentProfile := services.Get(os.Getenv("Email"))[0]
+	currentProfile := UserService.GetUser(os.Getenv("Email"))[0]
 	currentEmail := currentProfile.Email
 
 	newProfile, validateProfile := ChangeProfileParams(*updateProfile, currentProfile)
@@ -145,11 +152,11 @@ func UpdateProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	if currentEmail != newProfile.Email && len(services.Get(newProfile.Email)) > 0 {
+	if currentEmail != newProfile.Email && len(UserService.GetUser(newProfile.Email)) > 0 {
 		return e.JSON(http.StatusBadRequest, "Account with this email already exists!")
 	}
 
-	if err := services.UpdateProfile(&newProfile); err != nil {
+	if err := UserService.UpdateProfile(&newProfile); err != nil {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
 

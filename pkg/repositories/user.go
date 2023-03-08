@@ -20,7 +20,7 @@ func UserDBInstance(d *gorm.DB) domain.IUserRepo {
 	}
 }
 
-func (repo *dbUser) Register(user *models.User) error {
+func (repo *dbUser) RegisterUser(user *models.User) error {
 	if err := db.Create(user).Error; err != nil {
 		return err
 	}
