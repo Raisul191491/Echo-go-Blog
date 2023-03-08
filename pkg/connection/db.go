@@ -13,7 +13,7 @@ var (
 	db *gorm.DB
 )
 
-func Connect() {
+func DBConnect() {
 	utils.SetConfig()
 	config := utils.LocalConfig
 
@@ -27,10 +27,10 @@ func Connect() {
 
 func GetDB() *gorm.DB {
 	// CreateDatabase()
-	Migrate()
 	if db == nil {
-		Connect()
+		DBConnect()
 	}
+	Migrate()
 	return db
 }
 

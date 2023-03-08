@@ -1,11 +1,11 @@
 package controllers
 
 import (
+	"errors"
 	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 	"go-blog/pkg/types"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -25,7 +25,7 @@ func CreateBlog(e echo.Context) error {
 
 	id, err := GetIntEnv("ID")
 	if err != nil {
-		return e.JSON(http.StatusInternalServerError, err.Error())
+		return e.JSON(http.StatusInternalServerError, "err.Error()")
 	}
 
 	blog := &models.Blog{
@@ -99,7 +99,10 @@ func DeleteBlog(e echo.Context) error {
 }
 
 func GetIntEnv(key string) (int, error) {
-	val := os.Getenv(key)
-	ret, err := strconv.Atoi(val)
+	CacheMap, err := CheckCache()
+	if err != nil {
+		return 0, errors.New("Caching error")
+	}
+	ret, err := strconv.Atoi(CacheMap["ID"])
 	return ret, err
 }

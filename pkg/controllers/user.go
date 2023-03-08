@@ -1,26 +1,36 @@
 package controllers
 
 import (
-	"fmt"
+	"errors"
 	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 	"go-blog/pkg/services"
 	"go-blog/pkg/types"
 	"net/http"
-	"os"
+	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/labstack/echo/v4"
 )
 
-var UserService domain.IUserService
+var (
+	UserService domain.IUserService
+	cache       *redis.Client
+)
 
-func SetUserService(userService domain.IUserService) {
+func SetUserService(userService domain.IUserService, client *redis.Client) {
 	UserService = userService
+	cache = client
 }
 
 func Registration(e echo.Context) error {
 
-	if os.Getenv("Auth") != "" && os.Getenv("ID") != "" && os.Getenv("Email") != "" {
+	checkCache, err := CheckCache()
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	if checkCache["Auth"] != "" && checkCache["ID"] != "" && checkCache["Email"] != "" {
 		return e.JSON(http.StatusBadRequest, "First Log out of existing account")
 	}
 
@@ -44,7 +54,7 @@ func Registration(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Account with this email already exists!")
 	}
 
-	err := UserService.RegisterUser(newUser)
+	err = UserService.RegisterUser(newUser)
 	if err != nil {
 		return e.JSON(http.StatusBadRequest, "User not created")
 	}
@@ -52,7 +62,11 @@ func Registration(e echo.Context) error {
 }
 
 func Login(e echo.Context) error {
-	if os.Getenv("Auth") != "" && os.Getenv("ID") != "" && os.Getenv("Email") != "" {
+	checkCache, err := CheckCache()
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if checkCache["Auth"] != "" && checkCache["ID"] != "" && checkCache["Email"] != "" {
 		return e.JSON(http.StatusBadRequest, "Already logged in to another account")
 	}
 
@@ -74,17 +88,18 @@ func Login(e echo.Context) error {
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, "Could not generate token")
 	}
-	os.Setenv("Auth", token)
-	os.Setenv("Email", loginUser.Email)
-	os.Setenv("ID", fmt.Sprint(user[0].ID))
+
+	cache.Set("Email", loginUser.Email, 15*time.Minute)
+	cache.Set("Auth", token, 15*time.Minute)
+	cache.Set("ID", user[0].ID, 15*time.Minute)
 
 	return e.JSON(http.StatusOK, "Successfully logged in...")
 }
 
 func Logout(e echo.Context) error {
-	os.Unsetenv("Email")
-	os.Unsetenv("ID")
-	os.Unsetenv("Auth")
+	cache.Del("Email")
+	cache.Del("ID")
+	cache.Del("Auth")
 	return e.JSON(http.StatusOK, "Successfully logged out")
 }
 
@@ -112,7 +127,11 @@ func DeleteProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
 
-	if deleteProfile.Email != os.Getenv("Email") {
+	checkCache, err := CheckCache()
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, err.Error())
+	}
+	if deleteProfile.Email != checkCache["Email"] {
 		return e.JSON(http.StatusBadRequest, "Not authorized to delete this account")
 	}
 
@@ -143,7 +162,11 @@ func UpdateProfile(e echo.Context) error {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
 
-	currentProfile := UserService.GetUser(os.Getenv("Email"))[0]
+	checkCache, err := CheckCache()
+	if err != nil {
+		return e.JSON(http.StatusInternalServerError, err.Error())
+	}
+	currentProfile := UserService.GetUser(checkCache["Email"])[0]
 	currentEmail := currentProfile.Email
 
 	newProfile, validateProfile := ChangeProfileParams(*updateProfile, currentProfile)
@@ -164,8 +187,8 @@ func UpdateProfile(e echo.Context) error {
 	if err != nil {
 		return e.JSON(http.StatusInternalServerError, "err.Error()")
 	}
-	os.Setenv("Auth", token)
-	os.Setenv("Email", newProfile.Email)
+	cache.Set("Email", newProfile.Email, 15*time.Minute)
+	cache.Set("Auth", token, 15*time.Minute)
 
 	return e.JSON(http.StatusCreated, "Successfull updated profile")
 }
@@ -188,4 +211,26 @@ func ChangeProfileParams(updateProfile types.ControlUser, currentProfile models.
 	}
 
 	return currentProfile, tempProfile
+}
+
+func CheckCache() (map[string]string, error) {
+	mp := make(map[string]string)
+	auth, err := cache.Get("Auth").Result()
+	if err != nil {
+		return mp, errors.New("Caching Error")
+	}
+	mp["Auth"] = auth
+	email, err := cache.Get("Email").Result()
+	if err != nil {
+		return mp, errors.New("Caching Error")
+	}
+	mp["Email"] = email
+	ID, err := cache.Get("ID").Result()
+	if err == nil {
+		return mp, errors.New("Caching Error")
+
+	}
+	mp["ID"] = ID
+
+	return mp, nil
 }

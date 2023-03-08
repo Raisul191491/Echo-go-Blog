@@ -13,19 +13,22 @@ import (
 )
 
 func Init(e *echo.Echo) {
-	connection.Connect()
 	db := connection.GetDB()
+	client := connection.GetRedis()
 
+	/* User */
 	userRepo := repositories.UserDBInstance(db)
 	services.SetUserInterface(userRepo)
 	userService := services.UserServiceInstance(userRepo)
-	controllers.SetUserService(userService)
+	controllers.SetUserService(userService, client)
 
+	/* Blog */
 	blogRepo := repositories.BlogDBInstance(db)
 	services.SetBlogInterface(blogRepo)
 	blogService := services.BlogServiceInstance(blogRepo)
 	controllers.SetBlogService(blogService)
 
+	/* Token */
 	tokenAuth := auth.TokenAuthInstance(userRepo)
 	services.SetTokenAuth(tokenAuth)
 
