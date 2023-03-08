@@ -65,7 +65,7 @@ func Login(e echo.Context) error {
 
 	token, err := services.GenerateToken(user[0].Email, user[0].Username)
 	if err != nil {
-		return e.JSON(http.StatusInternalServerError, "err.Error()")
+		return e.JSON(http.StatusInternalServerError, "Could not generate token")
 	}
 	os.Setenv("Auth", token)
 	os.Setenv("Email", loginUser.Email)

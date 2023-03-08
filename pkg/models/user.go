@@ -14,10 +14,3 @@ type User struct {
 	CreatedAt        time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt        time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
-
-type IUser interface {
-	Register(user *User) error
-	GetUsers(email string) []User
-	UpdateProfile(user *User) error
-	DeleteProfile(email string) error
-}

@@ -12,7 +12,7 @@ import (
 )
 
 func CreateBlog(e echo.Context) error {
-	newBlog := &types.NewBlogBody{}
+	newBlog := &types.ControlBlog{}
 	if err := e.Bind(newBlog); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
@@ -28,7 +28,7 @@ func CreateBlog(e echo.Context) error {
 		UserID:  uint(id),
 	}
 
-	if err := blog.Validate(); err != nil {
+	if err := newBlog.Validate(); err != nil {
 		return e.JSON(http.StatusBadRequest, err.Error())
 	}
 

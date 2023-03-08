@@ -1,13 +1,14 @@
 package services
 
 import (
+	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 	"go-blog/pkg/types"
 )
 
-var BlogInterface models.IBlog
+var BlogInterface domain.IBlogRepo
 
-func SetBlogInterface(blog models.IBlog) {
+func SetBlogInterface(blog domain.IBlogRepo) {
 	BlogInterface = blog
 }
 

@@ -2,15 +2,16 @@ package services
 
 import (
 	"errors"
+	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 	"go-blog/pkg/types"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-var UserInterface models.IUser
+var UserInterface domain.IUserRepo
 
-func SetUserInterface(user models.IUser) {
+func SetUserInterface(user domain.IUserRepo) {
 	UserInterface = user
 }
 

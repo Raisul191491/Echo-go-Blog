@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 
 	"gorm.io/gorm"
@@ -11,7 +12,7 @@ type dbBlog struct {
 	DB *gorm.DB
 }
 
-func BlogDBInstance(d *gorm.DB) models.IBlog {
+func BlogDBInstance(d *gorm.DB) domain.IBlogRepo {
 	db = d
 	return &dbBlog{
 		DB: db,

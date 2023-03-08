@@ -1,6 +1,10 @@
 package types
 
-import "time"
+import (
+	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+)
 
 type NewBlogBody struct {
 	Subject string `json:"subject"`
@@ -25,4 +29,15 @@ type ControlBlog struct {
 	UpdatedAt time.Time   `json:"updated_at"`
 	UserID    uint        `json:"userID"`
 	User      ControlUser `json:"user"`
+}
+
+func (b ControlBlog) Validate() error {
+	return validation.ValidateStruct(&b,
+		validation.Field(&b.Subject,
+			validation.Required.Error("Please input subject of your post"),
+			validation.Length(5, 60)),
+		validation.Field(&b.Body,
+			validation.Required.Error("Description needed!"),
+			validation.Length(6, 300)),
+	)
 }
