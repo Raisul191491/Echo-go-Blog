@@ -7,12 +7,14 @@ import (
 	"go-blog/pkg/repositories"
 	"go-blog/pkg/routes"
 	"go-blog/pkg/services"
+	"go-blog/pkg/utils"
 	"log"
 
 	"github.com/labstack/echo/v4"
 )
 
 func Init(e *echo.Echo) {
+	utils.SetConfig()
 	db := connection.GetDB()
 	client := connection.GetRedis()
 

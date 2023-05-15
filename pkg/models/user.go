@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -13,4 +15,10 @@ type User struct {
 	Verified         bool      `json:"verified"`
 	CreatedAt        time.Time `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt        time.Time `gorm:"autoUpdateTime" json:"updated_at"`
+}
+
+// var testDB *gorm.DB
+
+func SetTestDBInstance(tdb *gorm.DB) {
+	_ = tdb
 }

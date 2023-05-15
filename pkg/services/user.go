@@ -26,6 +26,7 @@ func SetUserInterface(user domain.IUserRepo) {
 }
 
 func (u *UserService) RegisterUser(user *models.User) error {
+
 	tempPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return err

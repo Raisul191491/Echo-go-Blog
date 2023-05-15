@@ -14,6 +14,12 @@ type Config struct {
 	DBIP   string `mapstructure:"DBIP"`
 	DbName string `mapstructure:"DBNAME"`
 	Port   string `mapstructure:"PORT"`
+
+	TestDBUser string `mapstructure:"TESTDBUSER"`
+	TestDBPass string `mapstructure:"TESTDBPASS"`
+	TestDBIP   string `mapstructure:"TESTDBIP"`
+	TestDbName string `mapstructure:"TESTDBNAME"`
+	TestPort   string `mapstructure:"TESTPORT"`
 }
 
 func InitConfig() (config *Config) {

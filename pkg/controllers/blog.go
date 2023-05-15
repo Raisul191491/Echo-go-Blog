@@ -101,7 +101,7 @@ func DeleteBlog(e echo.Context) error {
 func GetIntEnv(key string) (int, error) {
 	CacheMap, err := CheckCache()
 	if err != nil {
-		return 0, errors.New("Caching error")
+		return 0, errors.New("caching error")
 	}
 	ret, err := strconv.Atoi(CacheMap["ID"])
 	return ret, err

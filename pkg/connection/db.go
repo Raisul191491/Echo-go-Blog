@@ -15,7 +15,6 @@ var (
 )
 
 func DBConnect() {
-	utils.SetConfig()
 	config := utils.LocalConfig
 
 	dsn := fmt.Sprintf("%s:%s@%s/%s?charset=utf8mb4&parseTime=True&loc=Local", config.DBUser, config.DBPass, config.DBIP, config.DbName)

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"errors"
+	"fmt"
 	domain "go-blog/pkg/domains"
 	"go-blog/pkg/models"
 	"go-blog/pkg/services"
@@ -33,8 +33,10 @@ func Registration(e echo.Context) error {
 	if checkCache["Auth"] != "" && checkCache["ID"] != "" && checkCache["Email"] != "" {
 		return e.JSON(http.StatusBadRequest, "First Log out of existing account")
 	}
+	fmt.Println("Hi")
 
 	user := &types.ControlUser{}
+
 	if err := e.Bind(user); err != nil {
 		return e.JSON(http.StatusBadRequest, "Bad inputs!")
 	}
@@ -50,6 +52,7 @@ func Registration(e echo.Context) error {
 	}
 
 	tempUser := UserService.GetUser(newUser.Email)
+
 	if len(tempUser) > 0 {
 		return e.JSON(http.StatusBadRequest, "Account with this email already exists!")
 	}
@@ -67,7 +70,7 @@ func Login(e echo.Context) error {
 		return e.JSON(http.StatusInternalServerError, err.Error())
 	}
 	if checkCache["Auth"] != "" && checkCache["ID"] != "" && checkCache["Email"] != "" {
-		return e.JSON(http.StatusBadRequest, "Already logged in to another account")
+		return e.JSON(http.StatusBadRequest, "Already logged into an account")
 	}
 
 	loginUser := &types.LoginType{}
@@ -215,21 +218,14 @@ func ChangeProfileParams(updateProfile types.ControlUser, currentProfile models.
 
 func CheckCache() (map[string]string, error) {
 	mp := make(map[string]string)
-	auth, err := cache.Get("Auth").Result()
-	if err != nil {
-		return mp, errors.New("Caching Error")
-	}
-	mp["Auth"] = auth
-	email, err := cache.Get("Email").Result()
-	if err != nil {
-		return mp, errors.New("Caching Error")
-	}
-	mp["Email"] = email
-	ID, err := cache.Get("ID").Result()
-	if err == nil {
-		return mp, errors.New("Caching Error")
 
-	}
+	auth, _ := cache.Get("Auth").Result()
+	mp["Auth"] = auth
+
+	email, _ := cache.Get("Email").Result()
+	mp["Email"] = email
+
+	ID, _ := cache.Get("ID").Result()
 	mp["ID"] = ID
 
 	return mp, nil

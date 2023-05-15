@@ -10,10 +10,7 @@ import (
 
 func Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		cacheMap, err := controllers.CheckCache()
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
-		}
+		cacheMap, _ := controllers.CheckCache()
 		token := cacheMap["Auth"]
 		if token == "" {
 			return c.JSON(http.StatusUnauthorized, "Login required...")
